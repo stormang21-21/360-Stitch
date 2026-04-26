@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+*.xcuserstate
+
+# OpenCV (200MB+)
+code/ios/opencv2.framework/
+code/ios/opencv2.xcframework.zip
+
+# Build
+build/
+DerivedData/
