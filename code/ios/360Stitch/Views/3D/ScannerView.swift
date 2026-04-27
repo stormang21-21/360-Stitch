@@ -63,19 +63,25 @@ struct ScannerView: View {
                                 .background(Color.blue).cornerRadius(30)
                         }
                         
-                        if !exportService.isExporting {
-                            Button(action: {
-                                print("🟣 EXPORT BUTTON TAPPED!")
-                                print("🟣 meshAnchors.count = \(captureService.meshAnchors.count)")
-                                print("🟣 hasMesh = \(captureService.hasMesh)")
-                                print("🟣 scanComplete = \(captureService.scanComplete)")
-                                
-                                Task {
-                                    await exportService.exportToUSDZ(
-                                        meshAnchors: captureService.meshAnchors
-                                    )
-                                }
-                            }) {
+                        Button(action: {
+                            print("🟣🟣🟣 EXPORT BUTTON TAPPED! 🟣🟣🟣")
+                            print("🟣 meshAnchors.count = \(captureService.meshAnchors.count)")
+                            print("🟣 hasMesh = \(captureService.hasMesh)")
+                            print("🟣 scanComplete = \(captureService.scanComplete)")
+                            print("🟣 isExporting = \(exportService.isExporting)")
+                            
+                            Task { @MainActor in
+                                await exportService.exportToUSDZ(
+                                    meshAnchors: captureService.meshAnchors
+                                )
+                            }
+                        }) {
+                            if exportService.isExporting {
+                                Text("Exporting...")
+                                    .font(.title2).fontWeight(.bold)
+                                    .foregroundColor(.white).frame(width: 200, height: 60)
+                                    .background(Color.gray).cornerRadius(30)
+                            } else {
                                 Text("Export USDZ")
                                     .font(.title2).fontWeight(.bold)
                                     .foregroundColor(.white).frame(width: 200, height: 60)
