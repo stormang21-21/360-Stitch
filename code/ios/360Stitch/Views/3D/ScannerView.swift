@@ -17,7 +17,7 @@ struct ScannerView: View {
                 .edgesIgnoringSafeArea(.all)
                 .allowsHitTesting(false)
             
-            // Top controls
+            // Top controls - non-interactive
             VStack {
                 HStack {
                     Button("Back") {
@@ -62,8 +62,9 @@ struct ScannerView: View {
                         .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
                 }.padding(.bottom, 40)
             }
+            .allowsHitTesting(false)
             
-            // Bottom controls - separate ZStack layer for guaranteed hit testing
+            // Bottom controls - interactive, separate layer
             if captureService.scanComplete {
                 VStack {
                     Spacer()
@@ -133,7 +134,7 @@ struct ScannerView: View {
                 }
             }
             
-            // 3D Viewer overlay - keeps same AR session alive
+            // 3D Viewer overlay
             if show3DViewer {
                 Color.black.opacity(0.3)
                     .edgesIgnoringSafeArea(.all)
