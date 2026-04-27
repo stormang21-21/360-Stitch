@@ -64,10 +64,10 @@ struct ScannerView: View {
             }
             
             // Bottom controls - interactive, separate layer
-            if captureService.scanComplete {
-                VStack {
-                    Spacer()
-                    VStack(spacing: 15) {
+            VStack {
+                Spacer()
+                VStack(spacing: 15) {
+                    if captureService.scanComplete {
                         Button(action: { show3DViewer.toggle() }) {
                             Text(show3DViewer ? "Back to Scan" : "View 3D Room")
                                 .font(.title2).fontWeight(.bold)
@@ -129,8 +129,8 @@ struct ScannerView: View {
                             .padding()
                         }
                     }
-                    .padding(.bottom, 40)
                 }
+                .padding(.bottom, 40)
             }
             
             // 3D Viewer overlay
