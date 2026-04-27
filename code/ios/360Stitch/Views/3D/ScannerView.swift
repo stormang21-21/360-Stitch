@@ -65,7 +65,11 @@ struct ScannerView: View {
                         
                         if !exportService.isExporting {
                             Button(action: {
-                                print("🟣 EXPORT BUTTON TAPPED! meshAnchors.count = \(captureService.meshAnchors.count)")
+                                print("🟣 EXPORT BUTTON TAPPED!")
+                                print("🟣 meshAnchors.count = \(captureService.meshAnchors.count)")
+                                print("🟣 hasMesh = \(captureService.hasMesh)")
+                                print("🟣 scanComplete = \(captureService.scanComplete)")
+                                
                                 Task {
                                     await exportService.exportToUSDZ(
                                         meshAnchors: captureService.meshAnchors
