@@ -62,7 +62,6 @@ struct ScannerView: View {
                         .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
                 }.padding(.bottom, 40)
             }
-            .allowsHitTesting(false)
             
             // Bottom controls - interactive, separate layer
             if captureService.scanComplete {
