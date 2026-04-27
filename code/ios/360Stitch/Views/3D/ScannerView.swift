@@ -16,7 +16,6 @@ struct ScannerView: View {
             ARWrapperView(captureService: captureService)
                 .edgesIgnoringSafeArea(.all)
             
-            // All controls in one overlay
             VStack {
                 // Top bar
                 HStack {
@@ -59,7 +58,17 @@ struct ScannerView: View {
                 
                 Spacer()
                 
-                // Bottom buttons - always visible when scan complete
+                // Start scan button (when not scanning and not complete)
+                if !captureService.isScanning && !captureService.scanComplete {
+                    Button(action: { captureService.startScan() }) {
+                        Text("Start 3D Scan").font(.title2).fontWeight(.bold)
+                            .foregroundColor(.white).frame(width: 200, height: 60)
+                            .background(Color.green).cornerRadius(30)
+                    }
+                    .padding(.bottom, 40)
+                }
+                
+                // Export buttons (when scan complete)
                 if captureService.scanComplete {
                     VStack(spacing: 15) {
                         Button(action: { show3DViewer.toggle() }) {
@@ -122,16 +131,6 @@ struct ScannerView: View {
                             }
                             .padding()
                         }
-                    }
-                    .padding(.bottom, 40)
-                }
-                
-                // Start scan button
-                if !captureService.isScanning && !captureService.scanComplete {
-                    Button(action: { captureService.startScan() }) {
-                        Text("Start 3D Scan").font(.title2).fontWeight(.bold)
-                            .foregroundColor(.white).frame(width: 200, height: 60)
-                            .background(Color.green).cornerRadius(30)
                     }
                     .padding(.bottom, 40)
                 }

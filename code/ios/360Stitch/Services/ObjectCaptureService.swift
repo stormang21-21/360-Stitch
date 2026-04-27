@@ -15,8 +15,11 @@ class ObjectCaptureService: ObservableObject {
     private var progressTimer: Timer?
     
     func updateMeshAnchors(_ anchors: [ARMeshAnchor]) {
-        meshAnchors = anchors
-        hasMesh = !anchors.isEmpty
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
+            self.meshAnchors = anchors
+            self.hasMesh = !anchors.isEmpty
+        }
     }
     
     func startScan() {
