@@ -184,12 +184,6 @@ struct ARWrapperView: UIViewRepresentable {
         
         arView.session.delegate = context.coordinator
         
-        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            if captureService.isScanning {
-                captureService.updateProgress()
-            }
-        }
-        
         return arView
     }
     

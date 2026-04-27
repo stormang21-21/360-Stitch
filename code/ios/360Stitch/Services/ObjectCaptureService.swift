@@ -2,6 +2,7 @@ import Foundation
 import RealityKit
 import ARKit
 
+@MainActor
 class ObjectCaptureService: ObservableObject {
     @Published var isScanning = false
     @Published var progress: Double = 0.0
@@ -13,9 +14,11 @@ class ObjectCaptureService: ObservableObject {
     
     private let scanDuration: TimeInterval = 15
     private var scanStartTime: Date?
+    private var progressTimer: Timer?
     
     func updateMeshAnchors(_ anchors: [ARMeshAnchor]) {
         meshAnchors = anchors
+        hasMesh = !anchors.isEmpty
     }
     
     func startScan() {
@@ -25,8 +28,16 @@ class ObjectCaptureService: ObservableObject {
         hasMesh = false
         meshAnchors = []
         scanStartTime = .now
+        
         statusText = "Scanning room... 0%"
         guidanceText = "Slowly walk around to capture the room"
+        
+        // Start a timer to update progress
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.updateProgress()
+            }
+        }
     }
     
     func updateProgress() {
@@ -44,6 +55,8 @@ class ObjectCaptureService: ObservableObject {
     }
     
     private func finishScan() {
+        progressTimer?.invalidate()
+        progressTimer = nil
         isScanning = false
         scanComplete = true
         
@@ -51,8 +64,8 @@ class ObjectCaptureService: ObservableObject {
             statusText = "Room scan complete! \(meshAnchors.count) surfaces"
             guidanceText = "Tap 'Export USDZ' to save"
         } else {
-            statusText = "Limited data captured"
-            guidanceText = "Try scanning again"
+            statusText = "Scan complete (no mesh detected)"
+            guidanceText = "Tap 'Export USDZ' to try anyway"
         }
     }
     
