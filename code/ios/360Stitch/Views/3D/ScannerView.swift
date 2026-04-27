@@ -17,6 +17,7 @@ struct ScannerView: View {
                 .edgesIgnoringSafeArea(.all)
                 .allowsHitTesting(false)
             
+            // Top controls
             VStack {
                 HStack {
                     Button("Back") {
@@ -56,7 +57,17 @@ struct ScannerView: View {
                                 .background(Color.green).cornerRadius(30)
                         }
                     }
-                    if captureService.scanComplete {
+                    
+                    Text(captureService.statusText).font(.caption).foregroundColor(.white)
+                        .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
+                }.padding(.bottom, 40)
+            }
+            
+            // Bottom controls - separate ZStack layer for guaranteed hit testing
+            if captureService.scanComplete {
+                VStack {
+                    Spacer()
+                    VStack(spacing: 15) {
                         Button(action: { show3DViewer.toggle() }) {
                             Text(show3DViewer ? "Back to Scan" : "View 3D Room")
                                 .font(.title2).fontWeight(.bold)
@@ -118,9 +129,8 @@ struct ScannerView: View {
                             .padding()
                         }
                     }
-                    Text(captureService.statusText).font(.caption).foregroundColor(.white)
-                        .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
-                }.padding(.bottom, 40)
+                    .padding(.bottom, 40)
+                }
             }
             
             // 3D Viewer overlay - keeps same AR session alive
