@@ -34,9 +34,7 @@ class ObjectCaptureService: ObservableObject {
         guidanceText = "Slowly walk around to capture the room"
         
         progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.updateProgress()
-            }
+            self?.updateProgress()
         }
     }
     
