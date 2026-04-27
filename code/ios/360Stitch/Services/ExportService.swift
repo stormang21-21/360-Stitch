@@ -4,6 +4,7 @@ import ModelIO
 import MetalKit
 import UIKit
 
+@MainActor
 class ExportService: ObservableObject {
     @Published var isExporting = false
     @Published var exportProgress: Double = 0.0
