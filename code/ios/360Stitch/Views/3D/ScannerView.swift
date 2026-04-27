@@ -174,6 +174,7 @@ struct ARWrapperView: UIViewRepresentable {
         
         arView.automaticallyConfigureSession = false
         arView.debugOptions = [.showSceneUnderstanding]
+        arView.isUserInteractionEnabled = false
         
         let config = ARWorldTrackingConfiguration()
         config.sceneReconstruction = .meshWithClassification
