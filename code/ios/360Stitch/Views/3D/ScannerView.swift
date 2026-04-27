@@ -1,11 +1,15 @@
 import SwiftUI
 import ARKit
 import RealityKit
+import UIKit
 
 struct ScannerView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var captureService = ObjectCaptureService()
+    @StateObject private var exportService = ExportService()
     @State private var show3DViewer = false
+    @State private var shareURL: URL?
+    @State private var showShareSheet = false
     
     var body: some View {
         ZStack {
@@ -58,10 +62,49 @@ struct ScannerView: View {
                                 .foregroundColor(.white).frame(width: 200, height: 60)
                                 .background(Color.blue).cornerRadius(30)
                         }
+                        
+                        if !exportService.isExporting {
+                            Button(action: {
+                                print("🟣 EXPORT BUTTON TAPPED! meshAnchors.count = \(captureService.meshAnchors.count)")
+                                Task {
+                                    await exportService.exportToUSDZ(
+                                        meshAnchors: captureService.meshAnchors
+                                    )
+                                }
+                            }) {
+                                Text("Export USDZ")
+                                    .font(.title2).fontWeight(.bold)
+                                    .foregroundColor(.white).frame(width: 200, height: 60)
+                                    .background(Color.purple).cornerRadius(30)
+                            }
+                        }
+                        
+                        if let _ = exportService.exportedURL {
+                            Button(action: {
+                                showShareSheet = true
+                            }) {
+                                Text("Share")
+                                    .font(.title2).fontWeight(.bold)
+                                    .foregroundColor(.white).frame(width: 200, height: 60)
+                                    .background(Color.green).cornerRadius(30)
+                            }
+                        }
+                        
                         Button(action: { captureService.startScan() }) {
                             Text("Scan Again").font(.title2).fontWeight(.bold)
                                 .foregroundColor(.white).frame(width: 200, height: 60)
                                 .background(Color.orange).cornerRadius(30)
+                        }
+                        
+                        if exportService.isExporting {
+                            VStack(spacing: 8) {
+                                ProgressView(value: exportService.exportProgress)
+                                    .progressViewStyle(.linear)
+                                    .tint(.white)
+                                Text(exportService.exportMessage)
+                                    .font(.caption).foregroundColor(.gray)
+                            }
+                            .padding()
                         }
                     }
                     Text(captureService.statusText).font(.caption).foregroundColor(.white)
@@ -92,6 +135,11 @@ struct ScannerView: View {
                         }
                     )
                     .onTapGesture { show3DViewer = false }
+            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let url = exportService.exportedURL {
+                ActivityViewController(activityItems: [url])
             }
         }
     }
@@ -127,19 +175,45 @@ struct ARWrapperView: UIViewRepresentable {
     
     class Coordinator: NSObject, ARSessionDelegate {
         var parent: ARWrapperView
+        var meshAnchors: [UUID: ARMeshAnchor] = [:]
         
         init(_ parent: ARWrapperView) { self.parent = parent; super.init() }
         
         func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
-            if anchors.contains(where: { $0 is ARMeshAnchor }) {
-                parent.captureService.hasMesh = true
+            for anchor in anchors {
+                if let mesh = anchor as? ARMeshAnchor {
+                    meshAnchors[mesh.identifier] = mesh
+                    parent.captureService.hasMesh = true
+                    parent.captureService.updateMeshAnchors(Array(meshAnchors.values))
+                }
             }
         }
         
         func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
-            if anchors.contains(where: { $0 is ARMeshAnchor }) {
-                parent.captureService.hasMesh = true
+            for anchor in anchors {
+                if let mesh = anchor as? ARMeshAnchor {
+                    meshAnchors[mesh.identifier] = mesh
+                    parent.captureService.hasMesh = true
+                    parent.captureService.updateMeshAnchors(Array(meshAnchors.values))
+                }
+            }
+        }
+        
+        func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
+            for anchor in anchors {
+                meshAnchors.removeValue(forKey: anchor.identifier)
             }
         }
     }
+}
+
+// MARK: - Share Sheet
+struct ActivityViewController: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

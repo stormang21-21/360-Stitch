@@ -1,26 +1,29 @@
 import Foundation
 import RealityKit
 import ARKit
-import UIKit
 
 class ObjectCaptureService: ObservableObject {
     @Published var isScanning = false
     @Published var progress: Double = 0.0
     @Published var statusText = "Ready"
     @Published var guidanceText = "Point at room and tap to start"
-    @Published var capturedPhotos = 0
     @Published var scanComplete = false
     @Published var hasMesh = false
+    @Published var meshAnchors: [ARMeshAnchor] = []
     
     private let scanDuration: TimeInterval = 15
     private var scanStartTime: Date?
     
+    func updateMeshAnchors(_ anchors: [ARMeshAnchor]) {
+        meshAnchors = anchors
+    }
+    
     func startScan() {
-        capturedPhotos = 0
         progress = 0.0
         scanComplete = false
         isScanning = true
         hasMesh = false
+        meshAnchors = []
         scanStartTime = .now
         statusText = "Scanning room... 0%"
         guidanceText = "Slowly walk around to capture the room"
@@ -45,8 +48,8 @@ class ObjectCaptureService: ObservableObject {
         scanComplete = true
         
         if hasMesh {
-            statusText = "Room scan complete! Tap to view"
-            guidanceText = "Tap 'View 3D Room'"
+            statusText = "Room scan complete! \(meshAnchors.count) surfaces"
+            guidanceText = "Tap 'Export USDZ' to save"
         } else {
             statusText = "Limited data captured"
             guidanceText = "Try scanning again"
