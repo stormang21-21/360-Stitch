@@ -2,7 +2,6 @@ import Foundation
 import RealityKit
 import ARKit
 
-@MainActor
 class ObjectCaptureService: ObservableObject {
     @Published var isScanning = false
     @Published var progress: Double = 0.0
@@ -17,24 +16,26 @@ class ObjectCaptureService: ObservableObject {
     private var progressTimer: Timer?
     
     func updateMeshAnchors(_ anchors: [ARMeshAnchor]) {
-        meshAnchors = anchors
-        hasMesh = !anchors.isEmpty
+        DispatchQueue.main.async {
+            self.meshAnchors = anchors
+            self.hasMesh = !anchors.isEmpty
+        }
     }
     
     func startScan() {
-        progress = 0.0
-        scanComplete = false
-        isScanning = true
-        hasMesh = false
-        meshAnchors = []
-        scanStartTime = .now
-        
-        statusText = "Scanning room... 0%"
-        guidanceText = "Slowly walk around to capture the room"
-        
-        // Start a timer to update progress
-        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
+        DispatchQueue.main.async {
+            self.progress = 0.0
+            self.scanComplete = false
+            self.isScanning = true
+            self.hasMesh = false
+            self.meshAnchors = []
+            self.scanStartTime = .now
+            
+            self.statusText = "Scanning room... 0%"
+            self.guidanceText = "Slowly walk around to capture the room"
+            
+            // Start a timer to update progress
+            self.progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
                 self?.updateProgress()
             }
         }
@@ -43,29 +44,35 @@ class ObjectCaptureService: ObservableObject {
     func updateProgress() {
         guard let startTime = scanStartTime else { return }
         let elapsed = Date().timeIntervalSince(startTime)
-        progress = min(elapsed / scanDuration, 1.0)
+        let newProgress = min(elapsed / scanDuration, 1.0)
         
-        let pct = Int(progress * 100)
-        statusText = "Scanning room... \(pct)%"
-        guidanceText = getGuidance(pct: pct)
-        
-        if progress >= 1.0 {
-            finishScan()
+        DispatchQueue.main.async {
+            self.progress = newProgress
+            let pct = Int(newProgress * 100)
+            self.statusText = "Scanning room... \(pct)%"
+            self.guidanceText = self.getGuidance(pct: pct)
+            
+            if newProgress >= 1.0 {
+                self.finishScan()
+            }
         }
     }
     
     private func finishScan() {
         progressTimer?.invalidate()
         progressTimer = nil
-        isScanning = false
-        scanComplete = true
         
-        if hasMesh {
-            statusText = "Room scan complete! \(meshAnchors.count) surfaces"
-            guidanceText = "Tap 'Export USDZ' to save"
-        } else {
-            statusText = "Scan complete (no mesh detected)"
-            guidanceText = "Tap 'Export USDZ' to try anyway"
+        DispatchQueue.main.async {
+            self.isScanning = false
+            self.scanComplete = true
+            
+            if self.hasMesh {
+                self.statusText = "Room scan complete! \(self.meshAnchors.count) surfaces"
+                self.guidanceText = "Tap 'Export USDZ' to save"
+            } else {
+                self.statusText = "Scan complete (no mesh detected)"
+                self.guidanceText = "Tap 'Export USDZ' to try anyway"
+            }
         }
     }
     
