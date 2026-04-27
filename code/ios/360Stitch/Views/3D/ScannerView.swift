@@ -196,28 +196,35 @@ struct ARWrapperView: UIViewRepresentable {
         init(_ parent: ARWrapperView) { self.parent = parent; super.init() }
         
         func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
-            for anchor in anchors {
-                if let mesh = anchor as? ARMeshAnchor {
-                    meshAnchors[mesh.identifier] = mesh
-                    parent.captureService.hasMesh = true
-                    parent.captureService.updateMeshAnchors(Array(meshAnchors.values))
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                for anchor in anchors {
+                    if let mesh = anchor as? ARMeshAnchor {
+                        self.meshAnchors[mesh.identifier] = mesh
+                        self.parent.captureService.updateMeshAnchors(Array(self.meshAnchors.values))
+                    }
                 }
             }
         }
         
         func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
-            for anchor in anchors {
-                if let mesh = anchor as? ARMeshAnchor {
-                    meshAnchors[mesh.identifier] = mesh
-                    parent.captureService.hasMesh = true
-                    parent.captureService.updateMeshAnchors(Array(meshAnchors.values))
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                for anchor in anchors {
+                    if let mesh = anchor as? ARMeshAnchor {
+                        self.meshAnchors[mesh.identifier] = mesh
+                        self.parent.captureService.updateMeshAnchors(Array(self.meshAnchors.values))
+                    }
                 }
             }
         }
         
         func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
-            for anchor in anchors {
-                meshAnchors.removeValue(forKey: anchor.identifier)
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                for anchor in anchors {
+                    self.meshAnchors.removeValue(forKey: anchor.identifier)
+                }
             }
         }
     }
