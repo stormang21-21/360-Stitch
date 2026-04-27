@@ -15,10 +15,10 @@ struct ScannerView: View {
         ZStack {
             ARWrapperView(captureService: captureService)
                 .edgesIgnoringSafeArea(.all)
-                .allowsHitTesting(false)
             
-            // Top controls - non-interactive
+            // All controls in one overlay
             VStack {
+                // Top bar
                 HStack {
                     Button("Back") {
                         dismiss()
@@ -29,45 +29,39 @@ struct ScannerView: View {
                     .cornerRadius(20)
                     Spacer()
                 }
+                
                 Spacer()
                 
+                // Scanning progress
                 if captureService.isScanning {
-                    Text(captureService.guidanceText)
-                        .font(.headline).foregroundColor(.white)
-                        .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
-                        .padding(.bottom, 10)
-                }
-                
-                if captureService.isScanning {
-                    ZStack {
-                        Circle().stroke(Color.white.opacity(0.3), lineWidth: 8).frame(width: 80, height: 80)
-                        Circle().trim(from: 0, to: captureService.progress)
-                            .stroke(Color.green, lineWidth: 8).frame(width: 80, height: 80)
-                            .rotationEffect(.degrees(-90))
-                        Text("\(Int(captureService.progress * 100))%")
-                            .font(.title2).fontWeight(.bold).foregroundColor(.white)
-                    }.padding(.bottom, 30)
-                }
-                
-                VStack(spacing: 15) {
-                    if !captureService.isScanning && !captureService.scanComplete {
-                        Button(action: { captureService.startScan() }) {
-                            Text("Start 3D Scan").font(.title2).fontWeight(.bold)
-                                .foregroundColor(.white).frame(width: 200, height: 60)
-                                .background(Color.green).cornerRadius(30)
+                    VStack(spacing: 10) {
+                        Text(captureService.guidanceText)
+                            .font(.headline).foregroundColor(.white)
+                            .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
+                        
+                        ZStack {
+                            Circle().stroke(Color.white.opacity(0.3), lineWidth: 8).frame(width: 80, height: 80)
+                            Circle().trim(from: 0, to: captureService.progress)
+                                .stroke(Color.green, lineWidth: 8).frame(width: 80, height: 80)
+                                .rotationEffect(.degrees(-90))
+                            Text("\(Int(captureService.progress * 100))%")
+                                .font(.title2).fontWeight(.bold).foregroundColor(.white)
                         }
                     }
-                    
-                    Text(captureService.statusText).font(.caption).foregroundColor(.white)
-                        .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
-                }.padding(.bottom, 40)
-            }
-            
-            // Bottom controls - interactive, separate layer
-            VStack {
+                    .padding(.bottom, 20)
+                }
+                
+                // Status text
+                Text(captureService.statusText)
+                    .font(.caption).foregroundColor(.white)
+                    .padding().background(Color.black.opacity(0.6)).cornerRadius(12)
+                    .padding(.bottom, 20)
+                
                 Spacer()
-                VStack(spacing: 15) {
-                    if captureService.scanComplete {
+                
+                // Bottom buttons - always visible when scan complete
+                if captureService.scanComplete {
+                    VStack(spacing: 15) {
                         Button(action: { show3DViewer.toggle() }) {
                             Text(show3DViewer ? "Back to Scan" : "View 3D Room")
                                 .font(.title2).fontWeight(.bold)
@@ -129,33 +123,18 @@ struct ScannerView: View {
                             .padding()
                         }
                     }
+                    .padding(.bottom, 40)
                 }
-                .padding(.bottom, 40)
-            }
-            
-            // 3D Viewer overlay
-            if show3DViewer {
-                Color.black.opacity(0.3)
-                    .edgesIgnoringSafeArea(.all)
-                    .overlay(
-                        VStack {
-                            Spacer()
-                            VStack(spacing: 12) {
-                                Text("🏠 3D Room View")
-                                    .font(.title2).fontWeight(.bold).foregroundColor(.white)
-                                Text("Walk around to see the mesh")
-                                    .font(.caption).foregroundColor(.gray)
-                                Text("Tap outside to go back")
-                                    .font(.caption).foregroundColor(.gray)
-                            }
-                            .padding()
-                            .background(Color.black.opacity(0.6))
-                            .cornerRadius(12)
-                            .padding(.bottom, 40)
-                            Spacer()
-                        }
-                    )
-                    .onTapGesture { show3DViewer = false }
+                
+                // Start scan button
+                if !captureService.isScanning && !captureService.scanComplete {
+                    Button(action: { captureService.startScan() }) {
+                        Text("Start 3D Scan").font(.title2).fontWeight(.bold)
+                            .foregroundColor(.white).frame(width: 200, height: 60)
+                            .background(Color.green).cornerRadius(30)
+                    }
+                    .padding(.bottom, 40)
+                }
             }
         }
         .sheet(isPresented: $showShareSheet) {
