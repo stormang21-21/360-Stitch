@@ -100,10 +100,8 @@ class ExportService: ObservableObject {
                 asset.add(mesh)
             }
             
-            print("📦 Asset contains \(asset.childObjects.count) objects")
-            for (idx, obj) in asset.childObjects.enumerated() {
-                print("  Object \(idx): \(obj.name ?? "unnamed") - \(obj.typeDescription)")
-            }
+            let objectCount = asset.childObjects.count
+            print("📦 Asset contains \(objectCount) objects")
             
             exportProgress = 0.8
             exportMessage = "Saving USDZ file..."
@@ -113,11 +111,10 @@ class ExportService: ObservableObject {
             let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             let url = documentsURL.appendingPathComponent("\(filename).usdz")
             
-            print("📦 Exporting \(asset.childObjects.count) objects to \(url.path)")
+            print("📦 Exporting \(objectCount) objects to \(url.path)")
             
-            // Export with explicit UTI
-            let usdzUTI = "com.usdz.usdz" as CFString
-            try asset.export(to: url, as: usdzUTI, options: nil)
+            // Export to USDZ
+            try asset.export(to: url)
             
             // Verify file was created
             if FileManager.default.fileExists(atPath: url.path) {
