@@ -111,8 +111,15 @@ class ExportService: ObservableObject {
         
         print("📦 Exporting to \(url.path)")
         
-        // Export to USDZ (non-throwing)
-        asset.export(to: url)
+        // Export to USDZ (throwing)
+        do {
+            try asset.export(to: url)
+        } catch {
+            exportMessage = "❌ Export failed: \(error.localizedDescription)"
+            print("❌ Export error: \(error)")
+            isExporting = false
+            return nil
+        }
         
         // Verify file was created
         if FileManager.default.fileExists(atPath: url.path) {
