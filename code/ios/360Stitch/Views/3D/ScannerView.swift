@@ -15,6 +15,7 @@ struct ScannerView: View {
         ZStack {
             ARWrapperView(captureService: captureService)
                 .edgesIgnoringSafeArea(.all)
+                .allowsHitTesting(false)
             
             VStack {
                 HStack {
