@@ -80,7 +80,10 @@ struct ScannerView: View {
                 // Export buttons (when scan complete)
                 if captureService.scanComplete {
                     VStack(spacing: 15) {
-                        Button(action: { show3DViewer.toggle() }) {
+                        Button(action: { 
+                            print("🔵 View 3D Room tapped, show3DViewer = \(show3DViewer)")
+                            show3DViewer.toggle() 
+                        }) {
                             Text(show3DViewer ? "Back to Scan" : "View 3D Room")
                                 .font(.title2).fontWeight(.bold)
                                 .foregroundColor(.white).frame(width: 200, height: 60)
