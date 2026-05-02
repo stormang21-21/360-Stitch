@@ -85,7 +85,7 @@ struct ScannerView: View {
                             print("🟣 scanComplete = \(captureService.scanComplete)")
                             print("🟣 isExporting = \(exportService.isExporting)")
                             
-                            Task { @MainActor in
+                            Task {
                                 await exportService.exportToUSDZ(
                                     meshAnchors: captureService.meshAnchors
                                 )
@@ -135,6 +135,9 @@ struct ScannerView: View {
                     .padding(.bottom, 40)
                 }
             }
+        }
+        .sheet(isPresented: $show3DViewer) {
+            Room3DViewer()
         }
         .sheet(isPresented: $showShareSheet) {
             if let url = exportService.exportedURL {

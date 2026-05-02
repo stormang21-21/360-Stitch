@@ -12,6 +12,7 @@ class ExportService: ObservableObject {
     @Published var exportedURL: URL?
     
     func exportToUSDZ(meshAnchors: [ARMeshAnchor]) async -> URL? {
+        print("📦 exportToUSDZ called with \(meshAnchors.count) mesh anchors")
         isExporting = true
         exportProgress = 0.0
         exportMessage = "Creating 3D model..."
