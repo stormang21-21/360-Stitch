@@ -38,10 +38,15 @@ class ObjectCaptureService: ObservableObject {
         }
     }
     
+    func finishScanEarly() {
+        guard isScanning else { return }
+        finishScan()
+    }
+    
     func updateProgress() {
         guard let startTime = scanStartTime else { return }
         let elapsed = Date().timeIntervalSince(startTime)
-        let newProgress = min(elapsed / 15.0, 1.0)
+        let newProgress = min(elapsed / 30.0, 1.0)
         
         progress = newProgress
         let pct = Int(newProgress * 100)
@@ -63,18 +68,19 @@ class ObjectCaptureService: ObservableObject {
             statusText = "Room scan complete! \(meshAnchors.count) surfaces"
             guidanceText = "Tap 'Export USDZ' to save"
         } else {
-            statusText = "Scan complete (no mesh detected)"
-            guidanceText = "Tap 'Export USDZ' to try anyway"
+            statusText = "⚠️ Scan complete (no mesh detected)"
+            guidanceText = "Try scanning again with more movement"
         }
     }
     
     private func getGuidance(pct: Int) -> String {
         switch pct {
-        case 0..<25: return "📸 Scan walls and ceiling"
-        case 25..<50: return "📐 Capture furniture"
-        case 50..<75: return "🔄 Scan the floor"
-        case 75..<90: return "✨ Almost done! Corners"
-        default: return "🎯 Final scan..."
+        case 0..<20: return "🚶‍♂️ Walk slowly around room"
+        case 20..<40: return "📸 Point at walls & ceiling"
+        case 40..<60: return "🛋️ Scan furniture & objects"
+        case 60..<80: return "🔄 Cover floor & corners"
+        case 80..<95: return "✨ Keep moving steadily"
+        default: return "✅ Almost done! Hold steady"
         }
     }
 }

@@ -46,6 +46,15 @@ struct ScannerView: View {
                             Text("\(Int(captureService.progress * 100))%")
                                 .font(.title2).fontWeight(.bold).foregroundColor(.white)
                         }
+                        
+                        // Manual complete button (when some progress made)
+                        if captureService.progress > 0.3 {
+                            Button("Complete Scan Early") {
+                                captureService.finishScanEarly()
+                            }
+                            .font(.caption).foregroundColor(.white)
+                            .padding(8).background(Color.blue.opacity(0.7)).cornerRadius(12)
+                        }
                     }
                     .padding(.bottom, 20)
                 }
